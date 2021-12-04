@@ -18,4 +18,40 @@ func main() {
 
 	fmt.Println("Successfully connected to our RabbitMQ instance")
 
+	channel, err := conn.Channel()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	defer channel.Close()
+
+	queue, err := channel.QueueDeclare(
+		"TestQueue",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println(queue)
+
+	err = channel.Publish(
+		"",
+		"TestQueue",
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte("Hello World"),
+		},
+	)
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	fmt.Println("Successfully publish message to queue")
 }
